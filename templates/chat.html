@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POWERTEAM!</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #6a11cb, #ff0080);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .chat-container {
+            width: 400px;
+            max-width: 90%;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 15px;
+            font-size: 24px;
+        }
+
+        #username-container {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        #username {
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
+            font-size: 16px;
+            text-align: center;
+            width: 80%;
+        }
+
+        #messages {
+            list-style: none;
+            padding: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            height: 300px;
+            margin-bottom: 15px;
+        }
+
+        #messages li {
+            padding: 10px;
+            margin: 5px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        input {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        button {
+            background: #ff0080;
+            border: none;
+            padding: 10px 15px;
+            color: white;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: #e60073;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <h1>PowerTeam Chat</h1>
+        <div id="username-container">
+            <input type="text" id="username" placeholder="Enter your username..." autocomplete="off">
+        </div>
+        <ul id="messages"></ul>
+        <div class="input-group">
+            <input type="text" id="message" placeholder="Type your message..." autocomplete="off">
+            <button id="send">Send</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var socket = io();
+    
+            socket.on("chat_history", function (history) {
+                var messagesList = document.getElementById("messages");
+                messagesList.innerHTML = ""; // Clear old messages
+                history.forEach(function (msg) {
+                    var li = document.createElement("li");
+                    li.textContent = msg;
+                    messagesList.appendChild(li);
+                });
+            });
+    
+            socket.on("message", function (msg) {
+                var li = document.createElement("li");
+                li.textContent = msg;
+                document.getElementById("messages").appendChild(li);
+            });
+    
+            function sendMessage() {
+                var username = document.getElementById("username").value.trim();
+                var message = document.getElementById("message").value.trim();
+    
+                if (username === "") {
+                    alert("Please enter a username first.");
+                    return;
+                }
+    
+                if (message !== "") {
+                    socket.send(username + ": " + message);
+                    document.getElementById("message").value = "";
+                }
+            }
+    
+            document.getElementById("send").addEventListener("click", sendMessage);
+    
+            document.getElementById("message").addEventListener("keypress", function (event) {
+                if (event.key === "Enter") {
+                    sendMessage();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
